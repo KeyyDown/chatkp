@@ -6,18 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Chat</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <style>
-    /* Stylizace pro zobrazení příchozích (přijatých) zpráv */
     .received-message {
       color: red;
     }
 
-    /* Stylizace pro zobrazení odchozích (odeslaných) zpráv */
     .sent-message {
       color: green;
     }
 
-    /* Additional styling for background gradient */
     body {
       height: 100vh;
       margin: 0;
@@ -87,20 +85,33 @@
         background-position: 0% 50%;
       }
     }
+
+    /* Added styles */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .input-container {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container mx-auto my-8">
-    <!-- New input field for nickname -->
-    <input id="nickname" autocomplete="off" class="rounded-l-lg p-4 border-t mr-2 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Nickname" />
-    <input id="input" autocomplete="off" class="rounded-l-lg p-4 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Message" />
-    <button onclick="chat_message()" id="sendButton" class="px-8 rounded-r-lg bg-gray-700  text-gray-200 font-bold p-4 uppercase border-gray-700 border-t border-b border-r" disabled>Send</button>
+  <div class="container">
+    <div class="input-container">
+      <input id="nickname" type="text" placeholder="Nickname">
+      <input id="input" type="text" placeholder="Message">
+      <button onclick="chat_message()" id="sendButton" class="button">Send</button>
+    </div>
     <ul id="messages" class="border rounded p-4 overflow-y-auto max-h-64"></ul>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.min.js"></script>
   <script>
+
     const socket = io("ws://localhost:3000");
 
     const input = document.getElementById('input');
@@ -109,7 +120,12 @@
     const sendButton = document.getElementById('sendButton');
 
     const msgcolor = document.getElementById('colorinput'); // You might want to define colorinput in your HTML
-
+    function printToMessageDiv(content) {
+      const item = document.createElement('li');
+      item.textContent = content;
+      item.classList.add('yellow-text');
+      messages.appendChild(item);
+    }
     const chat_message = () => {
       console.log('chat_message: ', input.value);
       if (input.value && nicknameInput.value) { // Ensure both message and nickname are provided
@@ -117,7 +133,12 @@
         socket.emit('chat_message', message);
         input.value = '';
         appendMessage(message, true); // Append sent message to UI
+      } else{
+        printToMessageDiv("Invalid nickname or message");
       }
+          
+
+
     };
 
     socket.on('chat_message', (msg) => {
